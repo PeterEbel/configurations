@@ -1,0 +1,81 @@
+$ sudo apt-get update
+$ sudo apt-get install open-vm-tool-desktop (must be desktop in order for copy & paste to work!)
+$ sudo apt-get install apache2 apache2-utils
+$ sudo systemctl enable apache2
+$ sudo systemctl start apache2
+$ sudo systemctl status apache2
+$ sudo apt-get install mysql-client mysql-server
+$ sudo mysql_secure_installation (skip password strength validation!)
+$ sudo mysql -u root -p
+
+  mysql> ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '***';
+
+$ sudo apt-get install php php-mysql libapache2-mod-php php-cli php-cgi php-gd
+
+Create PHP info file and check PHP version
+$ sudo nano /var/www/html/info.php
+
+  enter
+
+    <?php 
+      phpinfo();
+    ?>
+
+  Check in browser: localhost/info.php
+
+$ wget -c http://wordpress.org/latest.tar.gz
+$ tar -xzvf latest.tar.gz
+$ sudo rsync -av wordpress/* /var/www/html/
+$ sudo chown -R www-data:www-data /var/www/html/
+$ sudo chmod -R 755 /var/www/html/
+$ sudo mysql -u root -p
+
+  mysql> CREATE DATABASE wp_galeria_anatomica;
+  mysql> GRANT ALL PRIVILEGES ON wp_galeria_anatomica.* TO 'root'@'localhost';
+  mysql> FLUSH PRIVILEGES;
+  mysql> EXIT;
+
+$ cd /var/www/html
+$ sudo mv wp-config-sample.php wp-config.php
+$ sudo nano wp-config.php
+$ sudo systemctl restart apache2.service
+$ sudo systemctl restart mysql.service
+
+Start Wordpress Installation
+In browser go to: localhost/wp-admin
+
+Portnummer des Apache2 Webservers ändern (https://www.ostechnix.com/how-to-change-apache-ftp-and-ssh-default-port-to-a-custom-port-part-1/)
+$ sudo featherpad /etc/apache2/ports.conf (Listen 9980)
+$ sudo featherpad /etc/apache2/sites-enabled/000-default.conf (<VirtualHost *:9980>)
+
+IP-Addresse und Portnummer Wordpress ändern
+mysql> select * from wp_galeria_anatomica.wp_options where option_id = 1 or option_id = 2;
+mysql> update wp_galeria_anatomica.wp_options set option_value = 'http://192.168.178.70:9980' where option_id = 1 or option_id = 2;
++-----------+-------------+----------------------------+----------+
+| option_id | option_name | option_value               | autoload |
++-----------+-------------+----------------------------+----------+
+|         1 | siteurl     | http://192.168.178.70:9980 | yes      |
+|         2 | home        | http://192.168.178.70:9980 | yes      |
++-----------+-------------+----------------------------+----------+
+2 rows in set (0.00 sec)
+
+Security Apache2 to allow for use Postname Permalinks
+$ sudo featherpad /etc/apache2/apache.conf
+<Directory /var/www/>
+  Options Indexes FollowSymLinks
+  AllowOverride All
+  Require all granted
+</Directory>
+
+
+$ cat /etc/hosts
+# Host addresses
+127.0.0.1      localhost
+127.0.1.1      lubuntu-wordpress-vm
+::1            localhost ip6-localhost ip6-loopback
+ff02::1        ip6-allnodes
+
+https://www.tecmint.com/install-wordpress-on-ubuntu-16-04-with-lamp/
+https://www.ostechnix.com/how-to-change-apache-ftp-and-ssh-default-port-to-a-custom-port-part-1/
+https://kb.vmware.com/s/article/2006955
+
