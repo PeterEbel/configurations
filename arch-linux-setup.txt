@@ -280,8 +280,8 @@ rebnmtui
       IGNORE 1 LINES;
     
     LOAD DATA LOCAL INFILE '/home/peter/Projects/datafaker/balances-mariadb.csv' INTO TABLE shop.balances
-	    FIELDS TERMINATED BY '|'
-	    IGNORE 1 LINES;
+      FIELDS TERMINATED BY '|'
+      IGNORE 1 LINES;
 
 --install OpenJDK 17
   sudo pacman -Sy
