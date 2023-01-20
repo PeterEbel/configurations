@@ -1,0 +1,410 @@
+--set german keyboard
+  loadkeys de-latin1 
+
+--test internet
+  ip a  
+  wifi-menu (optional)
+
+--update mirrorlist
+  pacman -Syyy                                     
+  pacman -S reflector                              
+  reflector -c Germany -a 6 --sort rate --save /etc/pacman.d/mirrorlist
+  pacman -Syyy
+
+--partition disks
+  lsblk
+  fdisk /dev/sda
+
+--configure swap partition
+  o
+  n
+  p
+  1
+  First sector
+  Last sector +8G
+  t
+  L
+  82
+
+--configure root partition
+  n
+  p
+  2
+  First Sector
+  t
+  L
+  83
+
+--toggle bootable flag
+  a
+  2
+
+--write partition table
+  w
+
+--check partitioning
+  lsblk
+
+--format partitions
+  mkswap /dev/sda1
+  swapon /dev/sda1
+  mkfs.ext4 /dev/sda2
+  lsblk
+
+--mount root partition
+  mount /dev/sda2 /mnt
+
+--install base system
+  pacstrap /mnt base linux linux-firmware nano intel-ucode
+
+--generate filesystem table and store mount points
+  genfstab -U /mnt >> /mnt/etc/fstab
+  cat /mnt/etc/fstab
+
+--move into installation and leave installer
+  arch-chroot /mnt
+
+--set time zone
+  timedatectl list-timezones | grep Berlin
+  ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+--sync system clock to hardware clock
+  hwclock --systohc
+
+--edit and save locale.gen file abd generate locales
+  nano /etc/locale.gen
+  un-comment locale de_DE.UTF-8 UTF-8
+  locale-gen
+
+--create locale.conf file
+  nano /etc/locale.conf
+  LANG=de_DE.UTF-8
+
+--insert keymap in vconsole.conf
+  nano /etc/vconsole.conf
+  KEYMAP=de-latin1
+
+--create hostname
+  nano /etc/hostname
+  archbios
+
+--create hosts file
+  nano /etc/hosts  
+  127.0.0.1  <tab>  localhost
+  ::1 <tab>  <tab>  localhost
+  127.0.1.1  <tab>  archbios.localdomain  <tab>  archbios
+  
+--root user password
+  passwd
+
+--install boot loader and other packages
+  pacman -S grub networkmanager network-manager-applet wireless_tools wpa_supplicant dialog ospacman-prober mtools dosfstools base-devel linux-headers bluez bluez-utils cups xdg-utils xdg-user-dirs
+  grub-install --target=i386-pc /dev/sda
+  grub-mkconfig -o /boot/grub/grub.cfg
+
+--enable services
+  systemctl enable bluetooth
+  systemctl enable cups
+  systemctl enable NetworkManager
+
+--add user
+  useradd -mG wheel peter
+  passwd peter
+
+--set editor
+  EDITOR=nano visudo
+  un-comment %wheel ALL=(ALL) ALL
+
+--install ssh package
+  pacman -S openssh
+  systemctl enable sshd
+
+--install pulseaudio
+  pacman -S pulseaudio
+
+--exit installation and return to installer
+  exit
+rebnmtui
+--unmount all partitions
+  umount -a
+
+--reboot machine
+  reboot
+
+--select wifi after login (optional)
+  nmtui
+
+--install graphics drivers
+  sudo pacman -S xf86-video-qxl (for VMs)
+  sudo pacman -S xf86-video-intel (for Intel cards*)
+  sudo pacman -S xf86-video-amdgpu (for AMD cards)
+  sudo pacman -S nvidia nvidia-utils (for Nvidia cards)
+
+--install display server
+  sudo pacman -S xorg
+
+--install ghvfs (to save executable flag on desktop icons)
+  sudo pacman -Syu gvfs
+
+--install Ubuntu fonts
+  sudo pacman -S ttf-ubuntu-font-family
+
+--install virtual keyboard
+  sudo pacman -S qt5-virtualkeyboard
+  sudo mkdir /etc/sddm.conf.d
+  sudo nano /etc/sddm.conf.d/virtualkeyboard.conf
+  [General]
+  InputMethod=qtvirtualkeyboard
+
+--enable NetworkManager
+  systemctl enable NetworManager
+
+--install and enable display manager for LxQT or Lightdm for xfce
+  sudo pacman -S sddm
+  sudo systemctl enable sddm
+
+  --xfce only
+  sudo pacman -S lightdm lightdm-gtk-greeter
+  sudo systemctl enable lightdm
+
+--install desktop environment LxQT or xfce
+  sudo pacman -S lxqt lxqt-session lxqt-panel openbox breeze-icons oxygen-icons xdg-utils ttf-freefont firefox vlc filezilla leafpad xscreensaver archlinux-wallpaper
+  sudo pacman -S xfce4 xfce4-goodies 
+
+--gpg key problems
+  sudo pacman-key --refresh-keys
+
+--install OpenVMTools
+  sudo pacman -S open-vm-tools
+  sudo pacman -Su xf86-input-vmmouse xf86-video-vmware mesa gtk2 gtkmm
+  sudo echo needs_root_rights=yes >>/etc/X11/Xwrapper.config (Keine Berechtigung!?)
+  sudo systemctl enable vmtoolsd
+  sudo systemctl start vmtoolsd
+
+--reboot
+  reboot
+
+--install GIT
+  sudo pacman -Sy
+  sudo pacman -S git
+
+--install Visual Studio Code
+  sudo pacman -Sy
+  cd ~/Downloads
+  git clone https://AUR.archlinux.org/visual-studio-code-bin.git
+  cd visual-studio-code-bin/
+  makepkg -s
+  sudo pacman -U visual-studio-code-bin-*.pkg.tar.zst
+  cd ../ && sudo rm -rfv visual-studio-code-bin/
+
+--temporary mount of a Windows Share (Transfer) to /home/peter/Transfer
+  sudo /usr/bin/vmhgfs-fuse .host:/Transfer /home/peter/Transfer -o subtype=vmhgfs-fuse,allow_other
+
+--permanent mount of a Windows share (in /etc/fstab use <tab> instead of spaces)
+  sudo nano /etc/fstab
+  .host:/Transfer <tab> /home/peter/Transfer <tab> fuse.vmhgfs-fuse <tab> defaults,allow_other <tab> 0 <tab> 0
+
+--install GIT
+  sudo pacman -Sy
+  sudo pacman -S git
+
+--install pip for Python 3
+  sudo pacman -S python-pip
+
+--install virtualenv  
+  pip install virtualenv
+  sudo nano /etc/profile
+    append_path '/home/peter/.local/bin'
+    source /etc/profile
+
+--install Visual Studio Code
+  sudo pacman -Sy
+  cd ~/Downloads/
+  git clone https://AUR.archlinux.org/visual-studio-code-bin.git
+  cd visual-studio-code-bin/
+  makepkg -s
+  sudo pacman -U visual-studio-code-bin-*.pkg.tar.zst
+  cd ../ && sudo rm -rfv visual-studio-code-bin/
+
+--install MariaDB
+  pacman -S mariadb
+  sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+  systemctl start mariadb
+  sudo mariadb -u root -p
+  --create user, database and tables
+    CREATE DATABASE shop;
+    CREATE USER 'peter'@'localhost' IDENTIFIED BY '***';
+    CREATE USER 'cdc'@'localhost' IDENTIFIED BY '***';
+    GRANT ALL PRIVILEGES ON shop.* TO 'peter'@'localhost';
+    GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'cdc'@'localhost' IDENTIFIED BY '***';
+    flush privileges;
+    SELECT * FROM information_schema.user_privileges WHERE grantee="'cdc'@'localhost'";
+    quit;
+
+  --check if login works
+    sudo mariadb -u peter -p
+
+  --DDLs for shop tables
+    CREATE TABLE shop.customers
+    (
+      id INT NOT NULL primary key AUTO_INCREMENT,
+      entity_id CHAR(4),
+      customer_number CHAR(9),
+      valid_from_date DATE,
+      valid_to_date DATE,
+      gender_code CHAR(1),
+      last_name VARCHAR(50),
+      first_name VARCHAR(50),
+      birth_date DATE,
+      country_code CHAR(2),
+      postal_code CHAR(5),
+      city VARCHAR(50),
+      street VARCHAR(50),
+      data_date_part DATE
+    );
+
+    CREATE TABLE shop.balances
+    (
+      record_number INT NOT NULL primary key AUTO_INCREMENT,
+      entity_id CHAR(4),
+      customer_number CHAR(9),
+      instalment_amount DECIMAL(15,2),
+      term INT,
+      residual_debt DECIMAL(15,2),
+      data_date_part DATE
+    );
+
+  --load data into tables
+    LOAD DATA LOCAL INFILE '/home/peter/Projects/datafaker/customers-mariadb.csv' INTO TABLE shop.customers
+      FIELDS TERMINATED BY '|'
+      IGNORE 1 LINES;
+    
+    LOAD DATA LOCAL INFILE '/home/peter/Projects/datafaker/balances-mariadb.csv' INTO TABLE shop.balances
+	    FIELDS TERMINATED BY '|'
+	    IGNORE 1 LINES;
+
+--install OpenJDK 17
+  sudo pacman -Sy
+  sudo pacman -S jdk17-openjdk
+
+--install IntelliJ
+  sudo pacman -Sy
+  sudo pacman -S intellij-idea-community-edition
+
+--install Spark
+  download latest version from https://spark.apache.org/downloads.html (package type: Pre-built for Apache Hadoop x.x)
+  cd ~/Downloads
+  tar -zxvf spark-3.3.1-bin-hadoop3.tgz
+  mv spark-3.3.1-bin-hadoop3 spark-3.3.1
+  sudo mv spark-3.3.1 /opt
+
+  --set environment variables in ~/.bash_profile
+    export SPARK_HOME=/opt/spark-3.3.1
+    export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+    export PYSPARK_PYTHON=/usr/bin/python3
+
+--install Confluent Community edition
+  Download software from https://www.confluent.io/installation/ or use curl:
+  curl -O https://packages.confluent.io/archive/7.3/confluent-community-7.3.1.tar.gz
+  tar -zxvf confluent-community-7.3.1.tar.gz
+  sudo mv confluent-7.3.1 /opt
+  sudo chown -R peter:peter /opt/confluent-7.3.1
+
+  --configure Zookeeper (file /opt/confluent-7.3.1/etc/kafka/zookeeper.properties)
+    dataDir=/var/lib/zookeeper
+    clientPort=2181
+    maxClientCnxns=0
+    admin.enableServer=false
+    tickTime=2000
+    initLimit=5
+    syncLimit=2  
+    autopurge.snapRetainCount=3
+    autopurge.purgeInterval=24
+
+  --configure Kafka Connect
+    add the following line to /etc/profile:
+    export CONNECT_PLUGIN_PATH=/opt/confluent-7.3.1/connect
+
+  --list/create Kafka topics
+    ./bin/kafka-topics --bootstrap-server=localhost:9092 --list
+    ./bin/kafka-topics --bootstrap-server=localhost:9092 --create --topic localhost.shop.customers
+    ./bin/kafka-topics --bootstrap-server=localhost:9092 --delete --topic localhost.shop.balances
+    ./bin/kafka-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+
+  --install Debezium Connector
+    download connector from https://debezium.io/documentation/reference/stable/install.html
+    tar -zxvf debezium-connector-mysql-2.1.1.Final-plugin.tar.gz 
+    mkdir /opt/confluent-7.3.1/connect
+    mv debezium-connector-mysql /opt/confluent-7.3.1/connect/
+    nano /opt/confluent-7.3.1/etc/kafka/connect-standalone.properties
+
+    --set plugin path in /opt/confluent-7.3.1/etc/kafka/connect-standalone.properties
+      plugin.path=/opt/confluent-7.3.1/connect/
+
+    --create file connect-debezium-mysql.properties in /opt/confluent-7.3.1/etc/kafka
+      name=MySQL-Connector
+      connector.class=io.debezium.connector.mysql.MySqlConnector
+      tasks.max=1
+      database.hostname=localhost
+      database.port=3306
+      database.user=cdc
+      database.password=***
+      topic.prefix=localhost
+      database.server.id=1
+      database.server.name=localhost
+      database.serverTimezone=Europe/Berlin
+      database.include.list=shop
+      table.include.list=shop.customers
+      database.history.kafka.bootstrap.servers=localhost:9092
+      database.history.kafka.topic=dbhistory.test
+      include.schema.changes=true
+      schema.history.internal.kafka.bootstrap.servers=localhost:9092
+      schema.history.internal.kafka.topic=dbhistory.test
+      tombstones.on.delete=false
+      decimal.handling.mode=string
+
+  --enable log-bin in /etc/my.cnf.d/server.cnf in section [mariadb] by adding
+    systemctl stop mariadb
+    sudo nano /etc/my.cnf.d/server.cnf
+      server-id         = 1
+      log_bin           = mysql-bin
+      binlog_format     = ROW
+      binlog_row_image  = FULL
+      expire_logs_days  = 10
+    systemctl start mariadb
+    sudo mariadb -u root -p
+      SELECT variable_value as "BINARY LOGGING STATUS (log-bin) ::" FROM information_schema.global_variables WHERE variable_name='log_bin';
+
+--connect-standalone-properties in /opt/confluent-7.3.1/etc/Kafka
+  bootstrap.servers=localhost:9092
+  key.converter=org.apache.kafka.connect.json.JsonConverter
+  value.converter=org.apache.kafka.connect.json.JsonConverter
+  key.converter.schemas.enable=true
+  value.converter.schemas.enable=true
+  offset.storage.file.filename=/tmp/connect.offsets
+  offset.flush.interval.ms=10000
+  plugin.path=/opt/confluent-7.3.1/connect/      
+
+--start Kafka services
+  cd /opt/confluent-7.3.1
+  ./bin/zookeeper-server-start /opt/confluent-7.3.1/etc/kafka/zookeeper.properties
+  ./bin/kafka-server-start /opt/confluent-7.3.1/etc/kafka/server.properties
+  ./bin/schema-registry-start /opt/confluent-7.3.1/etc/schema-registry/schema-registry.properties
+  ./bin/connect-standalone /opt/confluent-7.3.1/etc/kafka/connect-standalone.properties /opt/confluent-7.3.1/etc/kafka/connect-debezium-mysql.properties
+  ./bin/ksql-server-start /opt/confluent-7.3.1/etc/kafka/ksqldb/ksql-server.properties
+
+--install Kafka packages in Python
+  virtualenv venv
+  . ./venv/bin/activate
+  pip install kafka-python
+  pip install confluent_kafka
+
+
+--install other software
+  sudo pacman -Sy
+  sudo pacman -S ffmpeg
+  sudo pacman -S imagemagick
+  pip  install mammoth (in virtual environment only)
+
+ 
+
