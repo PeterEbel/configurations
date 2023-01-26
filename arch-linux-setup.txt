@@ -330,6 +330,22 @@ rebnmtui
     ./bin/kafka-topics --bootstrap-server=localhost:9092 --create --topic localhost.shop.customers
     ./bin/kafka-topics --bootstrap-server=localhost:9092 --delete --topic localhost.shop.balances
     ./bin/kafka-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+    ./bin/kafka-topics --bootstrap-server=localhost:9092 --describe --topic localhost.shop.customers 
+    ./bin/kafka-delete-records --bootstrap-server=localhost:9092  --offset-json-file deleteme.json
+
+    deleteme.json
+    {
+      "partitions": [
+          {
+              "topic": "localhost.shop.customers",
+              "partition": 0,
+              "offset": -1
+          }
+      ],
+      "version": 1
+    }
+
+
 
   --install Debezium Connector
     download connector from https://debezium.io/documentation/reference/stable/install.html
