@@ -326,12 +326,17 @@ rebnmtui
     export CONNECT_PLUGIN_PATH=/opt/confluent-7.3.1/connect
 
   --list/create Kafka topics
-    ./bin/kafka-topics --bootstrap-server=localhost:9092 --list
-    ./bin/kafka-topics --bootstrap-server=localhost:9092 --create --topic localhost.shop.customers
-    ./bin/kafka-topics --bootstrap-server=localhost:9092 --delete --topic localhost.shop.balances
-    ./bin/kafka-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
-    ./bin/kafka-topics --bootstrap-server=localhost:9092 --describe --topic localhost.shop.customers 
-    ./bin/kafka-delete-records --bootstrap-server=localhost:9092  --offset-json-file deleteme.json
+    /opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --list
+    /opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --create --topic localhost.shop.customers
+    /opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --delete --topic localhost.shop.balances
+    /opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --describe --topic localhost.shop.customers 
+
+  --consume messages
+    /opt/confluent-7.3.1/bin/kafka-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+    /opt/confluent-7.3.1/bin/kafka-avro-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+
+  --delete all messages in a Kafka topic
+    /opt/confluent-7.3.1/bin/kafka-delete-records --bootstrap-server=localhost:9092  --offset-json-file deleteme.json
 
     deleteme.json
     {
@@ -344,8 +349,6 @@ rebnmtui
       ],
       "version": 1
     }
-
-
 
   --install Debezium Connector
     download connector from https://debezium.io/documentation/reference/stable/install.html
@@ -422,5 +425,21 @@ rebnmtui
   sudo pacman -S imagemagick
   pip  install mammoth (in virtual environment only)
 
- 
-
+--install Postgres
+  sudo pacman -Sy
+  sudo pacman -S postgresql
+  --become postgres user
+    sudo -iu postgres
+  --as postgres user, prompt [postgres]$
+    initdb -D /var/lib/postgres/data
+  --create superuser peter, and other non-superusers
+    createuser --interactive
+  --become user peter
+    exit
+    createdb galeria-anatomica
+    psql -h localhost -d galeria-anatomica -U peter -p 5432
+    create schema shop;
+    SELECT schema_name FROM information_schema.schemata;
+  --switch to a database
+    \c galeria-anatomica
+  
