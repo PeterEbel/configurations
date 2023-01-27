@@ -171,6 +171,10 @@ rebnmtui
   sudo pacman -S lxqt lxqt-session lxqt-panel openbox breeze-icons oxygen-icons xdg-utils ttf-freefont firefox vlc filezilla leafpad xscreensaver archlinux-wallpaper
   sudo pacman -S xfce4 xfce4-goodies 
 
+--use german keyboard layout in lxqt login screen
+  sudo nano /usr/share/sddm/scripts/Xsetup
+  setxkbmap de  
+
 --gpg key problems
   sudo pacman-key --refresh-keys
 
@@ -423,7 +427,7 @@ rebnmtui
   sudo pacman -Sy
   sudo pacman -S ffmpeg
   sudo pacman -S imagemagick
-  pip  install mammoth (in virtual environment only)
+  pip install mammoth (in virtual environment only)
 
 --install Postgres
   sudo pacman -Sy
@@ -436,10 +440,15 @@ rebnmtui
     createuser --interactive
   --become user peter
     exit
-    createdb galeria-anatomica
-    psql -h localhost -d galeria-anatomica -U peter -p 5432
-    create schema shop;
+    createdb galeria_anatomica (same as create database command as user peter)
+    psql -h localhost -d galeria_anatomica -U peter -p 5432
     SELECT schema_name FROM information_schema.schemata;
-  --switch to a database
-    \c galeria-anatomica
+  --switch to a database and create schema
+    \c galeria_anatomica
+    create schema shop;
+  --grant permissions
+    grant select on shop.customers TO spark;
+  --start service
+    systemctl start postgresql
+  
   
