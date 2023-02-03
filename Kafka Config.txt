@@ -1,0 +1,54 @@
+--install Confluent Community edition
+Download software from https://www.confluent.io/installation/ or use curl:
+curl -O https://packages.confluent.io/archive/7.3/confluent-community-7.3.1.tar.gz
+tar -zxvf confluent-community-7.3.1.tar.gz
+sudo mv confluent-7.3.1 /opt
+sudo chown -R peter:peter /opt/confluent-7.3.1
+
+--configure Zookeeper (file /opt/confluent-7.3.1/etc/kafka/zookeeper.properties)
+dataDir=/var/lib/zookeeper
+clientPort=2181
+maxClientCnxns=0
+admin.enableServer=false
+tickTime=2000
+initLimit=5
+syncLimit=2  
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=24
+
+--configure Kafka Connect
+add the following line to /etc/profile:
+export CONNECT_PLUGIN_PATH=/opt/confluent-7.3.1/connect
+
+--start Kafka services
+./bin/zookeeper-server-start /opt/confluent-7.3.1/etc/kafka/zookeeper.properties
+./bin/kafka-server-start /opt/confluent-7.3.1/etc/kafka/server.properties
+./bin/schema-registry-start /opt/confluent-7.3.1/etc/schema-registry/schema-registry.properties
+./bin/connect-standalone /opt/confluent-7.3.1/etc/kafka/connect-standalone.properties /opt/confluent-7.3.1/etc/kafka/connect-debezium-mysql.properties
+./bin/ksql-server-start /opt/confluent-7.3.1/etc/ksqldb/ksql-server.properties
+
+
+--list/create Kafka topics
+/opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --list
+/opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --create --topic localhost.shop.customers
+/opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --delete --topic localhost.shop.balances
+/opt/confluent-7.3.1/bin/kafka-topics --bootstrap-server=localhost:9092 --describe --topic localhost.shop.customers 
+
+--consume messages
+/opt/confluent-7.3.1/bin/kafka-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+/opt/confluent-7.3.1/bin/kafka-avro-console-consumer --topic localhost.shop.customers --from-beginning --bootstrap-server localhost:9092
+
+--delete all messages in a Kafka topic
+/opt/confluent-7.3.1/bin/kafka-delete-records --bootstrap-server=localhost:9092  --offset-json-file deleteme.json
+
+deleteme.json
+{
+  "partitions": [
+      {
+          "topic": "localhost.shop.customers",
+          "partition": 0,
+          "offset": -1
+      }
+  ],
+  "version": 1
+}

@@ -414,7 +414,7 @@ rebnmtui
   ./bin/kafka-server-start /opt/confluent-7.3.1/etc/kafka/server.properties
   ./bin/schema-registry-start /opt/confluent-7.3.1/etc/schema-registry/schema-registry.properties
   ./bin/connect-standalone /opt/confluent-7.3.1/etc/kafka/connect-standalone.properties /opt/confluent-7.3.1/etc/kafka/connect-debezium-mysql.properties
-  ./bin/ksql-server-start /opt/confluent-7.3.1/etc/kafka/ksqldb/ksql-server.properties
+  ./bin/ksql-server-start /opt/confluent-7.3.1/etc/ksqldb/ksql-server.properties
 
 --install Kafka packages in Python
   virtualenv venv
