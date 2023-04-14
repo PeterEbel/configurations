@@ -451,4 +451,6 @@ rebnmtui
   --start service
     systemctl start postgresql
   
-  
+  --install dnsutils (dig command)
+    sudo pacman -Sy
+    sudo pacman -S dnsutils
