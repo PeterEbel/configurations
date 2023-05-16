@@ -102,7 +102,7 @@
   passwd
 
 --install boot loader and other packages
-  pacman -S grub networkmanager network-manager-applet wireless_tools wpa_supplicant dialog ospacman-prober mtools dosfstools base-devel linux-headers bluez bluez-utils cups xdg-utils xdg-user-dirs
+  pacman -S grub networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-headers bluez bluez-utils cups xdg-utils xdg-user-dirs
   grub-install --target=i386-pc /dev/sda
   grub-mkconfig -o /boot/grub/grub.cfg
 
