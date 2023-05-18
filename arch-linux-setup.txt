@@ -128,7 +128,7 @@
 
 --exit installation and return to installer
   exit
-rebnmtui
+
 --unmount all partitions
   umount -a
 
