@@ -179,6 +179,10 @@
   sudo nano /usr/share/sddm/scripts/Xsetup
   setxkbmap de  
 
+--use german keyboard layout in xfce4 login screen (lightdm-greeter)
+--see also: https://wiki.archlinux.org/title/LightDM#Multiple_keyboard_layouts_in_lightdm-gtk-greeter
+  localectl --no-convert set-x11-keymap de,de pc105,
+
 --gpg key problems
   sudo pacman-key --refresh-keys
 
