@@ -251,6 +251,7 @@
     GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'cdc'@'localhost' IDENTIFIED BY '***';
     flush privileges;
     SELECT * FROM information_schema.user_privileges WHERE grantee="'cdc'@'localhost'";
+  --explicitely alter root user and quit
     ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('***');
     quit;
 
@@ -296,7 +297,20 @@
       FIELDS TERMINATED BY '|'
       IGNORE 1 LINES;
 
-  mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+  --import timezones (important for Kafka Connect/Debezium)
+    mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+
+  --add timezone to [MariaDB] section in etc/my.cnf.d/server.cnf (important for Kafka Connect/Debezium) 
+    [mariadb]
+    server-id         = 1
+    log_bin           = mysql-bin
+    binlog_format     = ROW
+    binlog_row_image  = FULL
+    expire_logs_days  = 10
+    default_time_zone = Europe/Berlin
+
+  --restart MariaDB
+    systemctl restart mysql
 
 --install OpenJDK 17
   sudo pacman -Sy
