@@ -247,7 +247,9 @@
     CREATE DATABASE shop;
     CREATE USER 'peter'@'localhost' IDENTIFIED BY '***';
     CREATE USER 'cdc'@'localhost' IDENTIFIED BY '***';
+    CREATE USER 'spark'@'localhost' IDENTIFIED BY '***';
     GRANT ALL PRIVILEGES ON shop.* TO 'peter'@'localhost';
+    GRANT ALL PRIVILEGES ON shop.* TO 'spark'@'localhost';
     GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'cdc'@'localhost' IDENTIFIED BY '***';
     flush privileges;
     SELECT * FROM information_schema.user_privileges WHERE grantee="'cdc'@'localhost'";
