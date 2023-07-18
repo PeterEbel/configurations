@@ -251,6 +251,7 @@
     GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'cdc'@'localhost' IDENTIFIED BY '***';
     flush privileges;
     SELECT * FROM information_schema.user_privileges WHERE grantee="'cdc'@'localhost'";
+    ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('***');
     quit;
 
   --check if login works
