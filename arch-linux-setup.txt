@@ -447,6 +447,7 @@
   cd /home/peter/Projects/kafka/python/kafka_consumer/
   python -m venv ./venv  
   . ./venv/bin/activate
+  pip install --upgrade pip
   pip install kafka-python
   pip install confluent_kafka
 
@@ -454,7 +455,12 @@
   sudo pacman -Sy
   sudo pacman -S ffmpeg
   sudo pacman -S imagemagick
-  pip install mammoth (in virtual environment only)
+
+--install Mammoth
+  python -m venv ./venv  
+  . ./venv/bin/activate
+  pip install --upgrade pip
+  pip install mammoth
 
 --install Postgres
   sudo pacman -Sy
