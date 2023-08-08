@@ -1,3 +1,7 @@
+--copy iso file to USB stick
+  ls -l /dev/disk/by-id/usb-*
+  cp /home/peter/Downloads/archlinux-2023.05.03-x86_64.iso /dev/disk/by-id/usb-SanDisk_Extreme_AA010430130942155390-0:0
+
 --set german keyboard
   loadkeys de-latin1 
 
@@ -98,7 +102,7 @@
   passwd
 
 --install boot loader and other packages
-  pacman -S grub networkmanager network-manager-applet wireless_tools wpa_supplicant dialog ospacman-prober mtools dosfstools base-devel linux-headers bluez bluez-utils cups xdg-utils xdg-user-dirs
+  pacman -S grub networkmanager network-manager-applet wireless_tools wpa_supplicant dialog os-prober mtools dosfstools base-devel linux-headers bluez bluez-utils cups xdg-utils xdg-user-dirs
   grub-install --target=i386-pc /dev/sda
   grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -124,7 +128,7 @@
 
 --exit installation and return to installer
   exit
-rebnmtui
+
 --unmount all partitions
   umount -a
 
@@ -174,6 +178,10 @@ rebnmtui
 --use german keyboard layout in lxqt login screen
   sudo nano /usr/share/sddm/scripts/Xsetup
   setxkbmap de  
+
+--use german keyboard layout in xfce4 login screen (lightdm-greeter)
+--see also: https://wiki.archlinux.org/title/LightDM#Multiple_keyboard_layouts_in_lightdm-gtk-greeter
+  localectl --no-convert set-x11-keymap de,de pc105,
 
 --gpg key problems
   sudo pacman-key --refresh-keys
@@ -239,10 +247,14 @@ rebnmtui
     CREATE DATABASE shop;
     CREATE USER 'peter'@'localhost' IDENTIFIED BY '***';
     CREATE USER 'cdc'@'localhost' IDENTIFIED BY '***';
+    CREATE USER 'spark'@'localhost' IDENTIFIED BY '***';
     GRANT ALL PRIVILEGES ON shop.* TO 'peter'@'localhost';
+    GRANT ALL PRIVILEGES ON shop.* TO 'spark'@'localhost';
     GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'cdc'@'localhost' IDENTIFIED BY '***';
     flush privileges;
     SELECT * FROM information_schema.user_privileges WHERE grantee="'cdc'@'localhost'";
+  --explicitely alter root user and quit
+    ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('***');
     quit;
 
   --check if login works
@@ -286,6 +298,21 @@ rebnmtui
     LOAD DATA LOCAL INFILE '/home/peter/Projects/datafaker/balances-mariadb.csv' INTO TABLE shop.balances
       FIELDS TERMINATED BY '|'
       IGNORE 1 LINES;
+
+  --import timezones (important for Kafka Connect/Debezium)
+    mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+
+  --add timezone to [MariaDB] section in etc/my.cnf.d/server.cnf (important for Kafka Connect/Debezium) 
+    [mariadb]
+    server-id         = 1
+    log_bin           = mysql-bin
+    binlog_format     = ROW
+    binlog_row_image  = FULL
+    expire_logs_days  = 10
+    default_time_zone = Europe/Berlin
+
+  --restart MariaDB
+    systemctl restart mysql
 
 --install OpenJDK 17
   sudo pacman -Sy
@@ -417,17 +444,23 @@ rebnmtui
   ./bin/ksql-server-start /opt/confluent-7.3.1/etc/ksqldb/ksql-server.properties
 
 --install Kafka packages in Python
-  virtualenv venv
+  cd /home/peter/Projects/kafka/python/kafka_consumer/
+  python -m venv ./venv  
   . ./venv/bin/activate
+  pip install --upgrade pip
   pip install kafka-python
   pip install confluent_kafka
-
 
 --install other software
   sudo pacman -Sy
   sudo pacman -S ffmpeg
   sudo pacman -S imagemagick
-  pip install mammoth (in virtual environment only)
+
+--install Mammoth
+  python -m venv ./venv  
+  . ./venv/bin/activate
+  pip install --upgrade pip
+  pip install mammoth
 
 --install Postgres
   sudo pacman -Sy
