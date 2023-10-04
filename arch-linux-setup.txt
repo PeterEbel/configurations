@@ -470,7 +470,7 @@
   --as postgres user, prompt [postgres]$
     initdb -D /var/lib/postgres/data
   --create superuser peter, and other non-superusers
-    createuser --interactive
+    createuser --interactive --pwprompt
   --become user peter
     exit
     createdb galeria_anatomica (same as create database command as user peter)
