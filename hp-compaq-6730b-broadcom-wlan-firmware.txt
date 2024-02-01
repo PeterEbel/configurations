@@ -1,0 +1,17 @@
+Firmware downloaden und entpacken
+---------------------------------
+http://www.lwfinger.com/b43-firmware/broadcom-wl-5.100.138.tar.bz2
+tar xfvj broadcom-wl-5.100.138.tar.bz2 
+
+Firmware-Installer von Installationsmedium kopieren und installieren
+--------------------------------------------------------------------
+/media/peter/Xubuntu 22.04.3 LTS amd64/pool/main/b/b43-fwcutter/b43-fwcutter_019-7build2_amd64.deb
+sudo dpkg -i b43-fwcutter*
+
+Firmware installieren
+---------------------
+sudo b43-fwcutter -w /lib/firmware broadcom-wl-5.100.138/linux/wl_apsta.o
+
+Rechner rebooten
+
+
